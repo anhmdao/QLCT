@@ -85,12 +85,12 @@
 //     });
     
 
-function confirmDelete() {
+function confirmDeleteTransactions() {
     var result = confirm("Website hiện chưa hỗ trợ chức năng xóa giao dịch!");
-    if (result) {
-        // If the user clicks "OK", submit the form
-        document.getElementById('deleteForm').submit();
-    } else {
-        // If the user clicks "Cancel", do nothing
-    }
+    // if (result) {
+    //     // If the user clicks "OK", submit the form
+    //     document.getElementById('deleteForm').submit();
+    // } else {
+    //     // If the user clicks "Cancel", do nothing
+    // }
 }

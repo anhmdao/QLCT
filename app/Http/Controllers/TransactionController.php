@@ -52,7 +52,7 @@ class TransactionController extends Controller
         $flatTransactions = $userWithCategoriesAndTransactions->wallets->flatMap->transactions;
 
         // Paginate the transactions manually
-        $perPage = 12;
+        $perPage = 18;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentItems = $flatTransactions->slice(($currentPage - 1) * $perPage, $perPage)->all();
         $transactions = new LengthAwarePaginator($currentItems, $flatTransactions->count(), $perPage, $currentPage);
@@ -132,7 +132,9 @@ class TransactionController extends Controller
         if (!$wallet || !$category) {
             return redirect()->back()->with('error', 'Invalid wallet or category.');
         }
-
+        if ($request->input('transaction-amount')<0){
+            return redirect()->back()->with('error', 'Số tiền giao dịch không hợp lệ!');
+        }
         // Check if the category is 'Nguồn thu'
         if ($category->name == 'Nguồn thu') {
             // Increment wallet balance for income

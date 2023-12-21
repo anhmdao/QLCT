@@ -43,7 +43,7 @@ class CategoriesController extends Controller
         $userWithCategories = User::with('categories')->find($userIdInSession);
 
         // Access the categories from the user model
-        $categories = $userWithCategories->categories()->paginate(10); 
+        $categories = $userWithCategories->categories()->paginate(15); 
 
         // Pass the categories to the view
         
@@ -56,8 +56,19 @@ class CategoriesController extends Controller
 
     public function add_category(Request $request ){
         $userIdInSession = session()->get('user_id');
-       
-       
+       // Get the name from the request
+        $name = $request->input('name');
+
+        // Check if a category with the same name already exists for the current user
+        $existingCategory = Category::where('user_id', $userIdInSession)
+            ->where('name', $name)
+            ->first();
+
+        if ($existingCategory) {
+            // Category with the same name already exists, handle accordingly (e.g., redirect back with an error message)
+            return redirect()->route('category')->with('error', 'Danh mục đã tồn tại.');
+        }
+        
         // Add a new category for the current user
         $category = new Category([
             'user_id' => $userIdInSession,
@@ -111,112 +122,112 @@ class CategoriesController extends Controller
         return redirect()->route('category')->with('success', 'Category updated successfully');
     }
 
-    public function index(): JsonResponse
-    {
-        try {
-            $data = $this->categoryRepository->getAll();
-            return $this->responseSuccess($data, 'Category List Fetch Successfully !');
-        } catch (Exception $e) {
-            return $this->responseError(null, $e->getMessage(), ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function indexAll(Request $request): JsonResponse
-    {
-        try {
-            $data = $this->categoryRepository->getPaginatedData($request->perPage);
-            return $this->responseSuccess($data, 'Category List Fetched Successfully !');
-        } catch (Exception $e) {
-            return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function search(Request $request): JsonResponse
-    {
-        try {
-            $data = $this->categoryRepository->searchCategory($request->search, $request->perPage);
-            return $this->responseSuccess($data, 'Category List Fetched Successfully !');
-        } catch (Exception $e) {
-            return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function findByUserId($id, Request $request): JsonResponse
-    {
-        try {
-            $data = $this->categoryRepository->findByUserId($id, $request->perPage);
-            return $this->responseSuccess($data, 'Category List Fetched Successfully !');
-        } catch (Exception $e) {
-            return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-
-        }
-    }
-
-    public function findByStatus($status, Request $request): JsonResponse
-    {
-        try {
-            $data = $this->categoryRepository->findByStatus($status, $request->perPage);
-            return $this->responseSuccess($data, 'Category List Fetched Successfully !');
-        } catch (Exception $e) {
-            return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-
-        }
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        try {
-            $product = $this->categoryRepository->create($request->all());
-            return $this->responseSuccess($product, 'New Category Created Successfully !');
-        } catch (Exception $exception) {
-            echo "Hello";
-            return $this->responseError(null, $exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function show($id): JsonResponse
-    {
-        try {
-            $data = $this->categoryRepository->getByID($id);
-            if (is_null($data)) {
-                return $this->responseError(null, 'Category Not Found', Response::HTTP_NOT_FOUND);
-            }
-
-            return $this->responseSuccess($data, 'Category Details Fetch Successfully !');
-        } catch (Exception $e) {
-            return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    // public function update($id, Request $request): JsonResponse
+    // public function index(): JsonResponse
     // {
     //     try {
-    //         $data = $this->categoryRepository->update($id, $request->all());
-    //         if (is_null($data))
-    //             return $this->responseError(null, 'Category Not Found', Response::HTTP_NOT_FOUND);
+    //         $data = $this->categoryRepository->getAll();
+    //         return $this->responseSuccess($data, 'Category List Fetch Successfully !');
+    //     } catch (Exception $e) {
+    //         return $this->responseError(null, $e->getMessage(), ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
-    //         return $this->responseSuccess($data, 'Category Updated Successfully !');
+    // public function indexAll(Request $request): JsonResponse
+    // {
+    //     try {
+    //         $data = $this->categoryRepository->getPaginatedData($request->perPage);
+    //         return $this->responseSuccess($data, 'Category List Fetched Successfully !');
     //     } catch (Exception $e) {
     //         return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     //     }
     // }
 
-    public function destroy($id): JsonResponse
-    {
-        try {
-            $product = $this->categoryRepository->getByID($id);
-            if (empty($product)) {
-                return $this->responseError(null, 'Category Not Found', Response::HTTP_NOT_FOUND);
-            }
+    // public function search(Request $request): JsonResponse
+    // {
+    //     try {
+    //         $data = $this->categoryRepository->searchCategory($request->search, $request->perPage);
+    //         return $this->responseSuccess($data, 'Category List Fetched Successfully !');
+    //     } catch (Exception $e) {
+    //         return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
-            $deleted = $this->categoryRepository->delete($id);
-            if (!$deleted) {
-                return $this->responseError(null, 'Failed to delete the Category.', Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+    // public function findByUserId($id, Request $request): JsonResponse
+    // {
+    //     try {
+    //         $data = $this->categoryRepository->findByUserId($id, $request->perPage);
+    //         return $this->responseSuccess($data, 'Category List Fetched Successfully !');
+    //     } catch (Exception $e) {
+    //         return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
 
-            return $this->responseSuccess($product, 'Category Deleted Successfully !');
-        } catch (Exception $e) {
-            return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+    //     }
+    // }
+
+    // public function findByStatus($status, Request $request): JsonResponse
+    // {
+    //     try {
+    //         $data = $this->categoryRepository->findByStatus($status, $request->perPage);
+    //         return $this->responseSuccess($data, 'Category List Fetched Successfully !');
+    //     } catch (Exception $e) {
+    //         return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+
+    //     }
+    // }
+
+    // public function store(Request $request): JsonResponse
+    // {
+    //     try {
+    //         $product = $this->categoryRepository->create($request->all());
+    //         return $this->responseSuccess($product, 'New Category Created Successfully !');
+    //     } catch (Exception $exception) {
+    //         echo "Hello";
+    //         return $this->responseError(null, $exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
+
+    // public function show($id): JsonResponse
+    // {
+    //     try {
+    //         $data = $this->categoryRepository->getByID($id);
+    //         if (is_null($data)) {
+    //             return $this->responseError(null, 'Category Not Found', Response::HTTP_NOT_FOUND);
+    //         }
+
+    //         return $this->responseSuccess($data, 'Category Details Fetch Successfully !');
+    //     } catch (Exception $e) {
+    //         return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
+
+    // // public function update($id, Request $request): JsonResponse
+    // // {
+    // //     try {
+    // //         $data = $this->categoryRepository->update($id, $request->all());
+    // //         if (is_null($data))
+    // //             return $this->responseError(null, 'Category Not Found', Response::HTTP_NOT_FOUND);
+
+    // //         return $this->responseSuccess($data, 'Category Updated Successfully !');
+    // //     } catch (Exception $e) {
+    // //         return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    // //     }
+    // // }
+
+    // public function destroy($id): JsonResponse
+    // {
+    //     try {
+    //         $product = $this->categoryRepository->getByID($id);
+    //         if (empty($product)) {
+    //             return $this->responseError(null, 'Category Not Found', Response::HTTP_NOT_FOUND);
+    //         }
+
+    //         $deleted = $this->categoryRepository->delete($id);
+    //         if (!$deleted) {
+    //             return $this->responseError(null, 'Failed to delete the Category.', Response::HTTP_INTERNAL_SERVER_ERROR);
+    //         }
+
+    //         return $this->responseSuccess($product, 'Category Deleted Successfully !');
+    //     } catch (Exception $e) {
+    //         return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 }

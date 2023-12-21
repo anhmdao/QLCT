@@ -111,7 +111,9 @@ class WalletController extends Controller
            $money_type_id = 2;
            $rate = MoneyType::where('name', $new)->value('rate');
        }
-   
+       if ($wallet->money_type_id = $money_type_id){
+        return redirect()->route('wallet')->with('error', 'Vui lòng chọn loại tiền khác!');
+       }
        if ($wallet->money_type_id != $money_type_id) {
            // Retrieve the user with their associated categories
            $userWithCategories = Wallet::with('transactions')->find($wallet->id);
@@ -165,7 +167,9 @@ class WalletController extends Controller
              // Handle the case where the category is not found
              return redirect()->back()->with('error', 'Invalid category selected.');
          }
-     
+         if ($request->input('wallet-balance')<0){
+            return redirect()->back()->with('error', 'Số dư không hợp lệ!');
+         }
 
         Transaction::create([
             'wallet_id' => $wallet_id,

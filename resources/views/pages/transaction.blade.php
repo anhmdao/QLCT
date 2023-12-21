@@ -68,7 +68,7 @@
                                             </a>
                                             
                                             
-                                                <button type="submit" class="delete-item mr-4" data-toggle="tooltip" data-placement="top" title="Xóa" onclick="confirmDelete()">
+                                                <button type="submit" class="delete-item mr-4" data-toggle="tooltip" data-placement="top" title="Xóa" onclick="confirmDeleteTransactions()">
                                                     <i class="fa fa-close color-danger"></i>
                                                 </button>
                                             
